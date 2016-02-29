@@ -43,6 +43,9 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     def isLoggedIn(self):
         # må fylle inn
 
+    def addToHistory(self):
+        # må fylle inn
+
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """
