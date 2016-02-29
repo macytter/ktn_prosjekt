@@ -6,6 +6,7 @@ Variables and functions that must be used by all the ClientHandler objects
 must be written here (e.g. a dictionary for connected clients)
 """
 
+
 class ClientHandler(SocketServer.BaseRequestHandler):
     """
     This is the ClientHandler class. Everytime a new client connects to the
@@ -18,6 +19,8 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         """
         This method handles the connection between a client and the server.
         """
+
+        self.username = 0     # TODO denne må endres!!
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
         self.connection = self.request
@@ -25,8 +28,20 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         # Loop that listens for messages from the client
         while True:
             received_string = self.connection.recv(4096)
-            
+
             # TODO: Add handling of received payload from client
+
+    def validUsername(self):
+    # må fylle inn
+
+    def getChatHistory(self):
+    # må fylle inn
+
+    def responseClient(self):
+    # må fylle inn
+
+    def isLoggedIn(self):
+        # må fylle inn
 
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
@@ -37,6 +52,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     No alterations are necessary
     """
     allow_reuse_address = True
+
 
 if __name__ == "__main__":
     """

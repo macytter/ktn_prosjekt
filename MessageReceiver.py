@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from threading import Thread
 
+
 class MessageReceiver(Thread):
 	"""
 	This is the message receiver class. The class inherits Thread, something that
