@@ -10,7 +10,7 @@ Variables and functions that must be used by all the ClientHandler objects
 must be written here (e.g. a dictionary for connected clients)
 """
 
-userNames
+userNames = []
 chatHistory = []
 connectedClients = {}
 helpText = "login <username>, logout, msg <message>, names, help"
@@ -26,7 +26,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 	def __init__(self):
 		self.possible_responses = {  # THESE ARE SERVER RESPONSES (SERVER -> CLIENT)
 			'login': self.,
-            'logout': self.
+            'logout': self.,
 			'help': self.parse_info,
 			'msg': self.parse_message,
 			'names': self.parse_history,
@@ -52,10 +52,14 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             # TODO: Add handling of received payload from client
 
     def validUsername(self, username):
-        if (len(username) < 16):
-            if re.match("^[A-Za-z0-9]+$", username):
-                return True
-        return False
+        if username in userNames:
+            print("The username is taken")
+        if not (len(username) < 16):
+            print("Username must be less than 15 characters")
+        if not re.match("^[A-Za-z0-9]+$", username):
+            print("Username must contain characters or numbers")
+        return True
+
 
 
     def getChatHistory(self):
@@ -74,6 +78,15 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     def sendJsonPayload(self, data):
         jSon = self.json.dumps(data)
         self.connection.send(jSon)
+
+    def formatDict(self):
+        payload= {
+            'timestamp': returnTimeStamp(),
+            'sender': sendJsonPayload(),
+            'response': responseClient(),
+            'content': self,
+        }
+
 
 
     def isLoggedIn(self, username):
