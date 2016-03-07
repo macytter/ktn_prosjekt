@@ -37,7 +37,7 @@ class UserInput(Thread):
 			try:
 				self.possible_responses[list[0]](list[1])
 			except IndexError:
-				self.possible_responses[list[0]]()
+				self.possible_responses[list[0]](None)
 
 		else:
 			print "Unknown command"
@@ -53,7 +53,7 @@ class UserInput(Thread):
 
 			self.client.send_payload(payload)
 
-	def handle_logout(self):
+	def handle_logout(self, unused):
 		if self.client.userLoggedIn:
 			payload = {
 				'request': 'logout',
@@ -74,7 +74,7 @@ class UserInput(Thread):
 		else:
 			print "Not logged in"
 
-	def handle_names(self):
+	def handle_names(self, unused):
 		if self.client.userLoggedIn:
 			payload = {
 				'request': 'names',
@@ -84,7 +84,7 @@ class UserInput(Thread):
 		else:
 			print "Not logged in"
 
-	def handle_help(self):
+	def handle_help(self, unused):
 		payload = {
 			'request': 'help',
 			'content': None,

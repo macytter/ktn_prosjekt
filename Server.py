@@ -39,7 +39,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 		}
 
 
-		self.username = 0     # TODO denne må endres!!
+		self.username = None
 		self.ip = self.client_address[0]
 		self.port = self.client_address[1]
 		self.connection = self.request
@@ -95,13 +95,13 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 			# username okay, user logged in
 			response_payload["response"] = "info"
 			response_payload["content"] = "Login successful"
-
+			self.username = payload["content"]
 			userNames.append(payload["content"])
 
 		self.sendJsonPayload(response_payload)
 
 		# send only history log if logged in successfully
-		if username in userNames:
+		if self.username in userNames:
 			response_payload = {
 				'timestamp': self.returnTimeStamp(),
 				'sender': 'server',
@@ -114,10 +114,9 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 
 
 	def handle_logout(self, payload):
-		username = payload["content"]
-
-		if username in userNames:
-			userNames.remove(username)
+		print "TEST: username: " + self.username
+		if self.username in userNames:
+			userNames.remove(self.username)
 			response_payload = {
 				'timestamp': self.returnTimeStamp(),
 				'sender': 'server',
@@ -202,3 +201,4 @@ if __name__ == "__main__":
 	# Set up and initiate the TCP server
 	server = ThreadedTCPServer((HOST, PORT), ClientHandler)
 	server.serve_forever()
+

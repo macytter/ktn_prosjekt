@@ -44,11 +44,6 @@ class MessageParser():
 		# login successful
 		if message == "Login successful":
 			self.client.userLoggedIn = True
-			payload = {
-				'request': 'history',
-				'content': None,
-			}
-			self.client.send_payload(payload)
 
 		# logout successful
 		if message == "Logout successful":
