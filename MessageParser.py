@@ -17,7 +17,6 @@ class MessageParser():
 
 	def parse(self, json_string, catch=None):
 		# print json_string
-		payload = json.loads(json_string)
 		try:
 			payload = json.loads(json_string)  # decode the JSON object
 		except Exception:

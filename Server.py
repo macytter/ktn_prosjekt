@@ -134,7 +134,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 			}
 			self.sendJsonPayload(response_payload)
 
-	def handle_help(self):
+	def handle_help(self, payload):
 		response_payload = {
 			'timestamp': self.returnTimeStamp(),
 			'sender': 'server',

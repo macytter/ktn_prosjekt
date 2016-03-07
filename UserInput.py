@@ -34,7 +34,11 @@ class UserInput(Thread):
 	def command(self, text):
 		list = text.split(' ', 1)
 		if list[0] in self.possible_responses:
-			self.possible_responses[list[0]](list[1])
+			try:
+				self.possible_responses[list[0]](list[1])
+			except IndexError:
+				self.possible_responses[list[0]]()
+
 		else:
 			print "Unknown command"
 
