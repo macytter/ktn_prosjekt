@@ -20,20 +20,18 @@ class Client:
 		self.host = host
 		self.server_port = server_port
 
-		self.messageReceiver = MessageReceiver(self, self.connection) # is a thread by itself.
-		self.userInput = UserInput(self) # is a thread by itself.
+		self.messageReceiver = MessageReceiver(self, self.connection)  # is a thread by itself.
+		self.userInput = UserInput(self)  # is a thread by itself.
 
 		self.parser = MessageParser()
 
 		self.run()
 
 	def run(self):
-
 		# Initiate the connection to the server
 		self.connection.connect((self.host, self.server_port))
-		self.messageReceiver.start() # start the thread
-		self.userInput.start() # start the thread
-
+		self.messageReceiver.start()  # start the thread
+		self.userInput.start()  # start the thread
 
 	def disconnect(self):
 		# TODO: Handle disconnection
@@ -43,7 +41,6 @@ class Client:
 	def receive_message(self, message):
 		parsed_message = self.parser.parse(message)
 		print parsed_message
-
 
 	def send_payload(self, data):
 		json = self.parser.encode(data)
