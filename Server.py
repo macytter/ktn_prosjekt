@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import SocketServer
+import re
 
 """
 Variables and functions that must be used by all the ClientHandler objects
@@ -31,8 +32,12 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 
             # TODO: Add handling of received payload from client
 
-    def validUsername(self):
-    # må fylle inn
+    def validUsername(self, username):
+        if (len(username) < 16):
+            if re.match("^[A-Za-z0-9]+$", username):
+                return True
+        return False
+
 
     def getChatHistory(self):
     # må fylle inn
