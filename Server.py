@@ -87,7 +87,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             'content': self,
         }
 
-
+    def getContent(self)
 
     def isLoggedIn(self, username):
         if username in userNames:
