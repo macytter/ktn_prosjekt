@@ -15,8 +15,15 @@ class MessageParser():
 	def encode(self, payload):
 		return json.dumps(payload)  # encode to json
 
-	def parse(self, json_string):
-		payload = json.loads(json_string)  # decode the JSON object
+	def parse(self, json_string, catch=None):
+		# print json_string
+		payload = json.loads(json_string)
+		try:
+			payload = json.loads(json_string)  # decode the JSON object
+		except Exception:
+			return "Error: unknown server response. Could not decode JSON."
+
+		
 
 		if payload['response'] in self.possible_responses:
 			return self.possible_responses[payload['response']](payload)
