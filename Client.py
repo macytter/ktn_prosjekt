@@ -20,10 +20,12 @@ class Client:
 		self.host = host
 		self.server_port = server_port
 
+		self.userLoggedIn = False
+
 		self.messageReceiver = MessageReceiver(self, self.connection)  # is a thread by itself.
 		self.userInput = UserInput(self)  # is a thread by itself.
 
-		self.parser = MessageParser()
+		self.parser = MessageParser(self)
 
 		self.run()
 
