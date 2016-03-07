@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 import SocketServer
+import re
+import json
 
 """
 Variables and functions that must be used by all the ClientHandler objects
 must be written here (e.g. a dictionary for connected clients)
 """
 
+userNames = []
+chatHistory = []
 
 class ClientHandler(SocketServer.BaseRequestHandler):
     """
@@ -31,20 +35,31 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 
             # TODO: Add handling of received payload from client
 
-    def validUsername(self):
-    # må fylle inn
+    def validUsername(self, username):
+        if (len(username) < 16):
+            if re.match("^[A-Za-z0-9]+$", username):
+                return True
+        return False
+
 
     def getChatHistory(self):
     # må fylle inn
 
     def responseClient(self):
-    # må fylle inn
 
-    def isLoggedIn(self):
-        # må fylle inn
 
-    def addToHistory(self):
-        # må fylle inn
+    def isLoggedIn(self, username):
+        if username in userNames:
+            return True
+        return False
+
+
+    def addToHistory(self, timestamp, username, msg):
+        if len(chatHistory) > 8:
+            delete chatHistory[9]
+        iter(chatHistory).first()[timestamp] = username + ": " + msg
+
+
 
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
