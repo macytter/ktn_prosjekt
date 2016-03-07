@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from threading import Thread
 
+import sys
+
 
 class UserInput(Thread):
 	"""
@@ -21,6 +23,7 @@ class UserInput(Thread):
 		Thread.__init__(self)
 
 		self.client = client
+		self.alive = True
 
 
 		self.possible_responses = {  # THESE ARE POSSIBLE COMMANDS:
@@ -91,8 +94,15 @@ class UserInput(Thread):
 		}
 		self.client.send_payload(payload)
 
-
 	def run(self):
-		while(True):
-			msg = raw_input("command: ")
-			self.command(msg)
+		while self.alive:
+			try:
+				msg = raw_input()
+				self.command(msg)
+			except SystemExit:  # GAH!! DOESNT WOOOORK.
+				sys.exit()
+
+	def kill(self):
+		self.alive = False
+		raise SystemExit
+		sys.exit()

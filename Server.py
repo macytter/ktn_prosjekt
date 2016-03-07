@@ -13,7 +13,7 @@ must be written here (e.g. a dictionary for connected clients)
 userNames = []
 chatHistory = []
 connectedClients = {}
-helpText = "login <username>, logout, msg <message>, names, help"
+helpText = "Available commands: login <username>, logout, msg <message>, names, help"
 
 
 class ClientHandler(SocketServer.BaseRequestHandler):
@@ -37,18 +37,24 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 			'names': self.handle_names,
 
 		}
-
-
 		self.username = None
 		self.ip = self.client_address[0]
 		self.port = self.client_address[1]
 		self.connection = self.request
 
+
+
 		# Loop that listens for messages from the client
 		while True:
-			received_string = self.connection.recv(4096)
-			parsed_json = json.loads(received_string)
-			self.handleRequest(parsed_json)
+			try:
+				received_string = self.connection.recv(4096)
+				parsed_json = json.loads(received_string)
+				self.handleRequest(parsed_json)
+			except Exception:
+				# connection broke
+				if self.username in userNames:
+					userNames.remove(self.username)
+				self.finish()
 
 
 	def handleRequest(self, payload):
@@ -97,11 +103,13 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 			response_payload["content"] = "Login successful"
 			self.username = payload["content"]
 			userNames.append(payload["content"])
+			# add client to client list
+			connectedClients[self.username] = self.connection
 
 		self.sendJsonPayload(response_payload)
 
-		# send only history log if logged in successfully
-		if self.username in userNames:
+		# send only history log and user login broadcast if logged in successfully
+		if self.username in userNames and len(chatHistory) > 0:
 			response_payload = {
 				'timestamp': self.returnTimeStamp(),
 				'sender': 'server',
@@ -110,6 +118,14 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 			}
 			self.sendJsonPayload(response_payload)
 
+			# user login broadcast
+			response_payload2 = {
+				'timestamp': self.returnTimeStamp(),
+				'sender': 'server',
+				'response': 'info',
+				'content': "User connected: " + self.username,
+			}
+			self.sendJsonPayloadToAll(response_payload2)
 
 
 
@@ -117,6 +133,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 		print "TEST: username: " + self.username
 		if self.username in userNames:
 			userNames.remove(self.username)
+			connectedClients.pop(self.username)
 			response_payload = {
 				'timestamp': self.returnTimeStamp(),
 				'sender': 'server',
@@ -142,16 +159,23 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 		}
 		self.sendJsonPayload(response_payload)
 
-
 	def handle_msg(self, payload):
-		pass
+
+		response_payload = {
+			'timestamp': self.returnTimeStamp(),
+			'sender': self.username,
+			'response': 'message',
+			'content': payload["content"],
+		}
+		chatHistory.append(response_payload)
+		self.sendJsonPayloadToAll(response_payload)
 
 	def handle_names(self, payload):
 		response_payload = {
 			'timestamp': self.returnTimeStamp(),
 			'sender': 'server',
 			'response': 'info',
-			'content': ", ".join(userNames),
+			'content': "Online users: " + ", ".join(userNames),
 		}
 		self.sendJsonPayload(response_payload)
 
@@ -163,10 +187,10 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 		jSon = json.dumps(data)
 		self.connection.send(jSon)
 
-
 	def sendJsonPayloadToAll(self, data):
 		jSon = json.dumps(data)
-		self.connection.send(jSon)
+		for con in connectedClients.values():
+			con.send(jSon)
 
 
 
@@ -188,6 +212,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 	allow_reuse_address = True
 
 
+
 if __name__ == "__main__":
 	"""
 	This is the main method and is executed when you type "python Server.py"
@@ -201,4 +226,3 @@ if __name__ == "__main__":
 	# Set up and initiate the TCP server
 	server = ThreadedTCPServer((HOST, PORT), ClientHandler)
 	server.serve_forever()
-
