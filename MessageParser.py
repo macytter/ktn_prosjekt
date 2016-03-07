@@ -2,7 +2,7 @@ import json
 
 
 class MessageParser():
-	def __init__(self):
+	def __init__(self, client):
 		self.possible_responses = {  # THESE ARE SERVER RESPONSES (SERVER -> CLIENT)
 			'error': self.parse_error,
 			'info': self.parse_info,
@@ -10,18 +10,13 @@ class MessageParser():
 			'history': self.parse_history,
 		}
 
-	def encode(self, message):
-		# TODO: do stuff with message and encode it. Check for errors too!
-		payload = message  # fiddled msg
+		self.client = client
 
+	def encode(self, payload):
 		return json.dumps(payload)  # encode to json
-
-	def parseInput(self, input_message):
-		pass
 
 	def parse(self, json_string):
 		payload = json.loads(json_string)  # decode the JSON object
-		print payload
 
 		if payload['response'] in self.possible_responses:
 			return self.possible_responses[payload['response']](payload)
@@ -33,11 +28,26 @@ class MessageParser():
 	def parse_error(self, payload):
 		timestamp = payload["timestamp"]
 		message = payload["content"]
+
 		return "[{}][SERVER] ERROR: {}".format(timestamp, message)
 
 	def parse_info(self, payload):
 		timestamp = payload["timestamp"]
 		message = payload["content"]
+
+		# login successful
+		if message == "Login successful":
+			self.client.userLoggedIn = True
+			payload = {
+				'request': 'history',
+				'content': None,
+			}
+			self.client.send_payload(payload)
+
+		# logout successful
+		if message == "Logout successful":
+			self.client.userLoggedIn = False
+
 		return "[{}][SERVER]: {}".format(timestamp, message)
 
 	def parse_message(payload):
@@ -48,12 +58,7 @@ class MessageParser():
 
 	def parse_history(self, payload):
 		history = payload["content"]
-		history_message = ""
 		history_list = list("")
 		for history_payload in history:
 			history_list.append(self.parse_message(history_payload))
-		"\n".join(history_list)  # join with new line as separator
-
-		return history_message
-
-
+		return "\n".join(history_list)  # join with new line as separator
