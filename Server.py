@@ -71,7 +71,9 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         ts = time.time()
         return datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
 
-
+    def sendJsonPayload(self, data):
+        jSon = self.json.dumps(data)
+        self.connection.send(jSon)
 
 
     def isLoggedIn(self, username):
