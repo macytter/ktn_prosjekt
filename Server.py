@@ -2,14 +2,18 @@
 import SocketServer
 import re
 import json
+import time
+import datetime
 
 """
 Variables and functions that must be used by all the ClientHandler objects
 must be written here (e.g. a dictionary for connected clients)
 """
 
-userNames = []
+userNames
 chatHistory = []
+connectedClients = {}
+helpText = "login <username>, logout, msg <message>, names, help"
 
 class ClientHandler(SocketServer.BaseRequestHandler):
     """
@@ -18,6 +22,16 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     only connected clients, and not the server itself. If you want to write
     logic for the server, you must write it outside this class
     """
+
+	def __init__(self):
+		self.possible_responses = {  # THESE ARE SERVER RESPONSES (SERVER -> CLIENT)
+			'login': self.,
+            'logout': self.
+			'help': self.parse_info,
+			'msg': self.parse_message,
+			'names': self.parse_history,
+
+		}
 
     def handle(self):
         """
@@ -32,6 +46,8 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         # Loop that listens for messages from the client
         while True:
             received_string = self.connection.recv(4096)
+            parsed_json = json.loads(received_string)
+
 
             # TODO: Add handling of received payload from client
 
@@ -43,9 +59,19 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 
 
     def getChatHistory(self):
-    # må fylle inn
+        return chatHistory
 
-    def responseClient(self):
+    def returnHelpText(self):
+        helpRespond = json.dumps(helpText)
+
+    def responseClient(self, parsedJson):
+        pass
+
+    def returnTimeStamp(self):
+        ts = time.time()
+        return datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
+
+
 
 
     def isLoggedIn(self, username):
@@ -56,7 +82,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 
     def addToHistory(self, timestamp, username, msg):
         if len(chatHistory) > 8:
-            delete chatHistory[9]
+            del chatHistory[9]
         iter(chatHistory).first()[timestamp] = username + ": " + msg
 
 
