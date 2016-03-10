@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 import socket
+
+import sys
+
 from MessageReceiver import MessageReceiver
 from MessageParser import MessageParser
 from UserInput import UserInput
@@ -31,13 +34,22 @@ class Client:
 
 	def run(self):
 		# Initiate the connection to the server
-		self.connection.connect((self.host, self.server_port))
+		try:
+			self.connection.connect((self.host, self.server_port))
+		except:
+			print "No connection to the server were established. Exiting."
+			sys.exit()
+
 		self.messageReceiver.start()  # start the thread
 		self.userInput.start()  # start the thread
 
+		print "Client Ready. Please type command. type 'help' to view server commands."
+
 	def disconnect(self):
-		# TODO: Handle disconnection
 		self.connection.close()
+		print "Server disconnected"
+		self.userInput.kill()
+		sys.exit()
 		pass
 
 	def receive_message(self, message):

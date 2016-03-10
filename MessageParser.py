@@ -46,12 +46,12 @@ class MessageParser():
 			self.client.userLoggedIn = True
 
 		# logout successful
-		if message == "Logout successful":
+		elif message == "Logout successful":
 			self.client.userLoggedIn = False
 
 		return "[{}][SERVER]: {}".format(timestamp, message)
 
-	def parse_message(payload):
+	def parse_message(self, payload):
 		timestamp = payload["timestamp"]
 		sender = payload["sender"]
 		message = payload["content"]

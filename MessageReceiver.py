@@ -33,6 +33,7 @@ class MessageReceiver(Thread):
 			try:
 				message = self.connection.recv(4096)
 				self.client.receive_message(message)
-			finally:
-				pass
+			except Exception:
+				# connection broke
+				self.client.disconnect()
 
