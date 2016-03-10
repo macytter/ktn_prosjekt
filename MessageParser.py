@@ -39,14 +39,6 @@ class MessageParser():
 		timestamp = payload["timestamp"]
 		message = payload["content"]
 
-		# login successful
-		if message == "Login successful":
-			self.client.userLoggedIn = True
-
-		# logout successful
-		elif message == "Logout successful":
-			self.client.userLoggedIn = False
-
 		return "[{}][SERVER]: {}".format(timestamp, message)
 
 	def parse_message(self, payload):
@@ -59,5 +51,5 @@ class MessageParser():
 		history = payload["content"]
 		history_list = list("")
 		for history_payload in history:
-			history_list.append(self.parse_message(history_payload))
+			history_list.append(self.parse_message(json.loads(history_payload)))
 		return "\n".join(history_list)  # join with new line as separator

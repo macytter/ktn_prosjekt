@@ -46,46 +46,33 @@ class UserInput(Thread):
 			print "Unknown command"
 
 	def handle_login(self, login):
-		if self.client.userLoggedIn:
-			print "Already logged in"
-		else:
-			payload = {
-				'request': 'login',
-				'content': login,
-			}
-
-			self.client.send_payload(payload)
+		payload = {
+			'request': 'login',
+			'content': login,
+		}
+		self.client.send_payload(payload)
 
 	def handle_logout(self, unused):
-		if self.client.userLoggedIn:
-			payload = {
-				'request': 'logout',
-				'content': None,
-			}
-			self.client.send_payload(payload)
-
-		else:
-			print "Not logged in"
+		payload = {
+			'request': 'logout',
+			'content': None,
+		}
+		self.client.send_payload(payload)
 
 	def handle_message(self, message):
-		if self.client.userLoggedIn:
-			payload = {
-				'request': 'msg',
-				'content': message,
-			}
-			self.client.send_payload(payload)
-		else:
-			print "Not logged in"
+		payload = {
+			'request': 'msg',
+			'content': message,
+		}
+		self.client.send_payload(payload)
 
 	def handle_names(self, unused):
-		if self.client.userLoggedIn:
-			payload = {
-				'request': 'names',
-				'content': None,
-			}
-			self.client.send_payload(payload)
-		else:
-			print "Not logged in"
+		payload = {
+			'request': 'names',
+			'content': None,
+		}
+		self.client.send_payload(payload)
+
 
 	def handle_help(self, unused):
 		payload = {

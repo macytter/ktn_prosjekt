@@ -48,10 +48,11 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 		while True:
 			try:
 				received_string = self.connection.recv(4096)
-				parsed_json = json.loads(received_string, encoding='utf-8')
+				parsed_json = json.loads(received_string)
 				self.handleRequest(parsed_json)
 			except Exception:
 				# connection broke
+
 				if self.username in userNames:
 					userNames.remove(self.username)
 				self.finish()
@@ -74,7 +75,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 
 		username = payload["content"]
 
-		response_payload = {
+		response_payload1 = {
 			'timestamp': self.returnTimeStamp(),
 			'sender': 'server',
 			'response': None,
@@ -84,54 +85,56 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 
 		if username in userNames:
 			# reply "username taken"
-			response_payload["response"] = "error"
-			response_payload["content"] = "Username taken"
+			response_payload1["response"] = "error"
+			response_payload1["content"] = "Username taken"
 
 		elif not (len(username) < 16):
 			# reply "username too long
-			response_payload["response"] = "error"
-			response_payload["content"] = "Username too long"
+			response_payload1["response"] = "error"
+			response_payload1["content"] = "Username too long"
 
 		elif not re.match("^[A-Za-z0-9]+$", username):
 			# reply username must contain characters or numbers
-			response_payload["response"] = "error"
-			response_payload["content"] = "username must contain characters or numbers"
+			response_payload1["response"] = "error"
+			response_payload1["content"] = "username must contain characters or numbers"
 
 		else:
 			# username okay, user logged in
-			response_payload["response"] = "info"
-			response_payload["content"] = "Login successful"
+			response_payload1["response"] = "info"
+			response_payload1["content"] = "Login successful"
 			self.username = payload["content"]
 			print "assigning username: " + self.username
 			userNames.append(payload["content"])
 			# add client to client list
 			connectedClients[self.username] = self.connection
 
-		self.sendJsonPayload(response_payload)
+		self.sendJsonPayload(response_payload1)
 
 		# send only history log and user login broadcast if logged in successfully
 		if (self.username in userNames) and len(chatHistory) > 0:
-			response_payload = {
+			response_payload2 = {
 				'timestamp': self.returnTimeStamp(),
 				'sender': 'server',
 				'response': 'history',
-				'content': chatHistory,
+				'content': chatHistory
 			}
-			self.sendJsonPayload(response_payload)
+			print response_payload2
+			self.sendJsonPayload(response_payload2)
 
 			# user login broadcast
-			response_payload2 = {
+			response_payload3 = {
 				'timestamp': self.returnTimeStamp(),
 				'sender': 'server',
 				'response': 'info',
 				'content': "User connected: " + self.username,
 			}
 			print "broadcasting login"
-			self.sendJsonPayloadToAll(response_payload2)
+			self.sendJsonPayloadToAll(response_payload3)
 
 
 
 	def handle_logout(self, payload):
+		print "Logging user out"
 		if self.username in userNames:
 			userNames.remove(self.username)
 			connectedClients.pop(self.username)
@@ -161,17 +164,25 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 		self.sendJsonPayload(response_payload)
 
 	def handle_msg(self, payload):
-
-		response_payload = {
-			'timestamp': self.returnTimeStamp(),
-			'sender': self.username,
-			'response': 'message',
-			'content': payload["content"],
-		}
-		chatHistory.append(response_payload)
-		if len(chatHistory) > 10:
-			chatHistory.pop(0)
-		self.sendJsonPayloadToAll(response_payload)
+		if self.username in userNames:
+			response_payload = {
+				'timestamp': self.returnTimeStamp(),
+				'sender': self.username,
+				'response': 'message',
+				'content': payload["content"],
+			}
+			chatHistory.append(json.dumps(response_payload))
+			if len(chatHistory) > 10:
+				chatHistory.pop(0)
+			self.sendJsonPayloadToAll(response_payload)
+		else:
+			response_payload = {
+				'timestamp': self.returnTimeStamp(),
+				'sender': 'server',
+				'response': 'error',
+				'content': "Not logged in.",
+			}
+			self.sendJsonPayload(response_payload)
 
 	def handle_names(self, payload):
 		response_payload = {
@@ -187,11 +198,10 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 		return datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
 
 	def sendJsonPayload(self, data):
-		jSon = json.dumps(data, encoding='utf-8')
-		self.connection.send(jSon)
+		self.connection.send(json.dumps(data))
 
 	def sendJsonPayloadToAll(self, data):
-		jSon = json.dumps(data, encoding='utf-8')
+		jSon = json.dumps(data)
 		for con in connectedClients.values():
 			con.send(jSon)
 
