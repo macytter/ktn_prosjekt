@@ -13,7 +13,7 @@ class MessageParser():
 		self.client = client
 
 	def encode(self, payload):
-		return json.dumps(payload)  # encode to json
+		return json.dumps(payload, encoding='utf-8')  # encode to json
 
 	def parse(self, json_string, catch=None):
 		# print json_string
@@ -21,8 +21,6 @@ class MessageParser():
 			payload = json.loads(json_string)  # decode the JSON object
 		except Exception:
 			return "Error: unknown server response. Could not decode JSON."
-
-		
 
 		if payload['response'] in self.possible_responses:
 			return self.possible_responses[payload['response']](payload)

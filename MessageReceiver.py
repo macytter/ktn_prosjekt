@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from threading import Thread
-
+import errno
+from socket import error as socket_error
 
 class MessageReceiver(Thread):
 	"""
@@ -29,11 +30,14 @@ class MessageReceiver(Thread):
 
 	def run(self):
 		# TODO: Make MessageReceiver receive and handle payloads
-		while(True):
+		while True:
 			try:
 				message = self.connection.recv(4096)
 				self.client.receive_message(message)
-			except Exception:
-				# connection broke
-				self.client.disconnect()
+			except UnicodeEncodeError:
+				print "Received a message that the client was unable to handle. Encoding error."
+			except socket_error as serr:
+				if serr.errno != errno.ECONNREFUSED:
+					self.client.disconnect()  # server disconnected
+
 

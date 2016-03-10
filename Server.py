@@ -48,7 +48,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 		while True:
 			try:
 				received_string = self.connection.recv(4096)
-				parsed_json = json.loads(received_string)
+				parsed_json = json.loads(received_string, encoding='utf-8')
 				self.handleRequest(parsed_json)
 			except Exception:
 				# connection broke
@@ -110,7 +110,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 		self.sendJsonPayload(response_payload)
 
 		# send only history log and user login broadcast if logged in successfully
-		if self.username in userNames:
+		if (self.username in userNames) and len(chatHistory) > 0:
 			response_payload = {
 				'timestamp': self.returnTimeStamp(),
 				'sender': 'server',
@@ -169,6 +169,8 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 			'content': payload["content"],
 		}
 		chatHistory.append(response_payload)
+		if len(chatHistory) > 10:
+			chatHistory.pop(0)
 		self.sendJsonPayloadToAll(response_payload)
 
 	def handle_names(self, payload):
@@ -185,23 +187,13 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 		return datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
 
 	def sendJsonPayload(self, data):
-		jSon = json.dumps(data)
+		jSon = json.dumps(data, encoding='utf-8')
 		self.connection.send(jSon)
 
 	def sendJsonPayloadToAll(self, data):
-		jSon = json.dumps(data)
+		jSon = json.dumps(data, encoding='utf-8')
 		for con in connectedClients.values():
 			con.send(jSon)
-
-
-
-	def addToHistory(self, timestamp, username, msg):
-		if len(chatHistory) > 8:
-			del chatHistory[9]
-		iter(chatHistory).first()[timestamp] = username + ": " + msg
-
-
-
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 	"""
@@ -211,7 +203,6 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 	No alterations are necessary
 	"""
 	allow_reuse_address = True
-
 
 
 if __name__ == "__main__":
