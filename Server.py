@@ -102,6 +102,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 			response_payload["response"] = "info"
 			response_payload["content"] = "Login successful"
 			self.username = payload["content"]
+			print "assigning username: " + self.username
 			userNames.append(payload["content"])
 			# add client to client list
 			connectedClients[self.username] = self.connection
@@ -109,7 +110,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 		self.sendJsonPayload(response_payload)
 
 		# send only history log and user login broadcast if logged in successfully
-		if self.username in userNames and len(chatHistory) > 0:
+		if self.username in userNames:
 			response_payload = {
 				'timestamp': self.returnTimeStamp(),
 				'sender': 'server',
@@ -125,12 +126,12 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 				'response': 'info',
 				'content': "User connected: " + self.username,
 			}
+			print "broadcasting login"
 			self.sendJsonPayloadToAll(response_payload2)
 
 
 
 	def handle_logout(self, payload):
-		print "TEST: username: " + self.username
 		if self.username in userNames:
 			userNames.remove(self.username)
 			connectedClients.pop(self.username)
